@@ -25,7 +25,7 @@ export default class Renderer {
   constructor(canvas) {
     this._canvas = canvas;
     this._objects = [];
-    this._clearColor = { r: 255, g: 255/255, b: 255/255, a: 1 }; // White
+    this._clearColor = { r: 0, g: 56/255, b: 101/255, a: 1 }; // Bucknell Blue
   }
   
   async init() {
@@ -72,7 +72,7 @@ export default class Renderer {
     this._objects.push(obj);
   }
   
-  renderToSelectedView(outputView, selectedColor) {
+  renderToSelectedView(outputView) {
     // update cpu geometry if needed
     for (const obj of this._objects) {
       obj?.updateGeometry();
