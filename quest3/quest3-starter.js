@@ -31,7 +31,7 @@ import Camera from '/lib/Viz/2DCamera.js'
 import CameraLineStrip2DAliveDeadObject from '/lib/DSViz/CameraLineStrip2DAliveDeadObject.js'
 import StandardTextObject from '/lib/DSViz/StandardTextObject.js'
 import PGA2D from '/lib/Math/PGA2D.js'
-import Standard2DPGACameraSceneObject from '/lib/DSViz/Standard2DPGACameraSceneObject.js'
+import Standard2DPGAPosedVertexColorObject from '/lib/DSViz/Standard2DPGAPosedVertexColorObject.js'
 
 window.addEventListener("keydown", (e) => {
   console.log("Key pressed (before init):", e.key);
@@ -67,7 +67,7 @@ async function init() {
      -1, 1, 0, 0, 1, 1,
      1, -1, 0, 1, 0, 1
   ]);
-  const quad = new Standard2DPGACameraSceneObject(renderer._device, renderer._canvasFormat, camera._pose, quadVertices, pose);
+  const quad = new Standard2DPGAPosedVertexColorObject(renderer._device, renderer._canvasFormat, camera._pose, quadVertices, pose);
   await renderer.appendSceneObject(quad);
   let fps = '??';
   var fpsText = new StandardTextObject('fps: ' + fps);
