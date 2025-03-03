@@ -431,8 +431,35 @@ fn computeOrthogonalMain(@builtin(global_invocation_id) global_id: vec3u) {
 @compute
 @workgroup_size(16, 16)
 fn computeProjectiveMain(@builtin(global_invocation_id) global_id: vec3u) {
-  // TODO: write code to generate projection camera ray and trace the ray to assign the pixel color
-  // This should be very similar to the orthogonal one above
-  
-  
+  let uv = vec2i(global_id.xy);
+  let texDim = vec2i(textureDimensions(outTexture));
+  if (uv.x < texDim.x && uv.y < texDim.y) {
+    // let sensorSize = vec2f(2.0, 2.0) / cameraPose.focal;
+
+    // Pixel size in normalized device coordinates ([-1,1] x [-1,1])
+    let psize = vec2f(2.0, 2.0) / cameraPose.res;
+
+    // Find pixel center in the image plane at z = 1
+    let px = (f32(uv.x) + 0.5) * psize.x - 1.0;
+    let py = (f32(uv.y) + 0.5) * psize.y - 1.0;
+    let p = vec3f(px, py, 1.0);
+
+    // pinhole camera center is at (0,0,0)
+    var spt = vec3f(0.0, 0.0, 0.0);
+
+    // Ray direction is from the origin toward p -> normalize
+    var rdir = normalize(p - spt);
+
+    // Apply transformations:
+    //  1. Camera pose
+    //  2. Inverse of box pose to move into the box’s model space
+    spt = transformPt(spt);
+    rdir = transformDir(rdir);
+
+    // Ray-box intersection
+    let hitInfo = rayBoxIntersection(spt, rdir);
+
+    // Assign color
+    assignColor(uv, hitInfo.x, i32(hitInfo.y));
+  }
 }
