@@ -27,7 +27,7 @@ export default class ImageFilterObject extends SceneObject {
   async createGeometry() {}
   
   async createShaders() {
-    let shaderCode = await this.loadShader("/shaders/computenothing.wgsl");
+    let shaderCode = await this.loadShader("./shaders/computenothing.wgsl");
     this._shaderModule = this._device.createShaderModule({
       label: " Shader " + this.getName(),
       code: shaderCode,

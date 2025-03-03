@@ -29,7 +29,7 @@ export default class ImageNosifyFilterObject extends ImageFilterObject {
   }
   
   async createShaders() {
-    let shaderCode = await this.loadShader("/shaders/computenosify.wgsl");
+    let shaderCode = await this.loadShader("./shaders/computenosify.wgsl");
     this._shaderModule = this._device.createShaderModule({
       label: " Shader " + this.getName(),
       code: shaderCode,

@@ -27,7 +27,7 @@ export default class RayTracingObject extends SceneObject {
   async createGeometry() {}
   
   async createShaders() {
-    let shaderCode = await this.loadShader("/shaders/tracenothing.wgsl");
+    let shaderCode = await this.loadShader("./shaders/tracenothing.wgsl");
     this._shaderModule = this._device.createShaderModule({
       label: " Shader " + this.getName(),
       code: shaderCode,

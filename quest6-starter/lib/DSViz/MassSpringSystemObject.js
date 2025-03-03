@@ -111,7 +111,7 @@ export default class MassSpringSystemObject extends SceneObject {
   updateGeometry() { }
   
   async createShaders() {
-    let shaderCode = await this.loadShader("/shaders/massspring.wgsl");
+    let shaderCode = await this.loadShader("./shaders/massspring.wgsl");
     this._shaderModule = this._device.createShaderModule({
       label: "Particles Shader " + this.getName(),
       code: shaderCode,

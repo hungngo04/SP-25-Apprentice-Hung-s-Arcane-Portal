@@ -66,7 +66,7 @@ export default class CameraLineStrip2DGridObject extends SceneObject {
   }
   
   async createShaders() {
-    let shaderCode = await this.loadShader("/shaders/camera2dgrid.wgsl");
+    let shaderCode = await this.loadShader("./shaders/camera2dgrid.wgsl");
     this._shaderModule = this._device.createShaderModule({
       label: " Shader " + this.getName(),
       code: shaderCode,

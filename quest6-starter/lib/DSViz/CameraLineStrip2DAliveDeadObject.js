@@ -86,7 +86,7 @@ export default class CameraLineStrip2DAliveDeadObject extends SceneObject {
   }
   
   async createShaders() {
-    let shaderCode = await this.loadShader("/shaders/camera2dalivedead.wgsl");
+    let shaderCode = await this.loadShader("./shaders/camera2dalivedead.wgsl");
     this._shaderModule = this._device.createShaderModule({
       label: " Shader " + this.getName(),
       code: shaderCode,
