@@ -27,7 +27,7 @@ export default class Camera {
   constructor(width, height) {
     this._pose = new Float32Array(Array(16).fill(0));
     this._pose[0] = 1;
-    this._focal = new Float32Array(Array(2).fill(1));
+    this._focal = new Float32Array(Array(2).fill(0.25));
     this._resolutions = new Float32Array([width, height]);
   }
   

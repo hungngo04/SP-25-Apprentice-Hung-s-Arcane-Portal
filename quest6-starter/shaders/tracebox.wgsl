@@ -434,14 +434,14 @@ fn computeProjectiveMain(@builtin(global_invocation_id) global_id: vec3u) {
   let uv = vec2i(global_id.xy);
   let texDim = vec2i(textureDimensions(outTexture));
   if (uv.x < texDim.x && uv.y < texDim.y) {
-    // let sensorSize = vec2f(2.0, 2.0) / cameraPose.focal;
+    let sensorSize = vec2f(2.0, 2.0) / cameraPose.focal;
 
     // Pixel size in normalized device coordinates ([-1,1] x [-1,1])
-    let psize = vec2f(2.0, 2.0) / cameraPose.res;
+    let psize = sensorSize / cameraPose.res;
 
-    // Find pixel center in the image plane at z = 1
-    let px = (f32(uv.x) + 0.5) * psize.x - 1.0;
-    let py = (f32(uv.y) + 0.5) * psize.y - 1.0;
+    // Find pixel center in the image plane at z = 1 with new pixel size
+    let px = (f32(uv.x) + 0.5) * psize.x - sensorSize.x * 0.5;
+    let py = (f32(uv.y) + 0.5) * psize.y - sensorSize.y * 0.5;
     let p = vec3f(px, py, 1.0);
 
     // pinhole camera center is at (0,0,0)
