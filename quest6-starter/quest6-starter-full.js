@@ -55,7 +55,7 @@ render(pass){throw new Error("Method 'render(pass)' must be implemented.");}
 async createComputePipeline(){throw new Error("Method 'createComputePipeline()' must be implemented.");}
 compute(pass){throw new Error("Method 'compute(pass)' must be implemented.");}}
 class RayTracingObject extends SceneObject{async createGeometry(){}
-async createShaders(){let shaderCode=await this.loadShader("./shaders/optimized_tracenothing.wgsl");this._shaderModule=this._device.createShaderModule({label:" Shader "+this.getName(),code:shaderCode,});}
+async createShaders(){let shaderCode=await this.loadShader("/shaders/optimized_tracenothing.wgsl");this._shaderModule=this._device.createShaderModule({label:" Shader "+this.getName(),code:shaderCode,});}
 updateGeometry(){}
 async createRenderPipeline(){}
 render(pass){}
@@ -71,7 +71,7 @@ updateBoxPose(){this._device.queue.writeBuffer(this._boxBuffer,0,this._box._pose
 updateBoxScales(){this._device.queue.writeBuffer(this._boxBuffer,this._box._pose.byteLength,this._box._scales);}
 updateCameraPose(){this._device.queue.writeBuffer(this._cameraBuffer,0,this._camera._pose);}
 updateCameraFocal(){this._device.queue.writeBuffer(this._cameraBuffer,this._camera._pose.byteLength,this._camera._focal);}
-async createShaders(){let shaderCode=await this.loadShader("./shaders/optimized_tracebox.wgsl");this._shaderModule=this._device.createShaderModule({label:" Shader "+this.getName(),code:shaderCode,});this._bindGroupLayout=this._device.createBindGroupLayout({label:"Ray Trace Box Layout "+this.getName(),entries:[{binding:0,visibility:GPUShaderStage.COMPUTE,buffer:{}},{binding:1,visibility:GPUShaderStage.COMPUTE,buffer:{}},{binding:2,visibility:GPUShaderStage.COMPUTE,storageTexture:{format:this._canvasFormat}}]});this._pipelineLayout=this._device.createPipelineLayout({label:"Ray Trace Box Pipeline Layout",bindGroupLayouts:[this._bindGroupLayout],});}
+async createShaders(){let shaderCode=await this.loadShader("/shaders/optimized_tracebox.wgsl");this._shaderModule=this._device.createShaderModule({label:" Shader "+this.getName(),code:shaderCode,});this._bindGroupLayout=this._device.createBindGroupLayout({label:"Ray Trace Box Layout "+this.getName(),entries:[{binding:0,visibility:GPUShaderStage.COMPUTE,buffer:{}},{binding:1,visibility:GPUShaderStage.COMPUTE,buffer:{}},{binding:2,visibility:GPUShaderStage.COMPUTE,storageTexture:{format:this._canvasFormat}}]});this._pipelineLayout=this._device.createPipelineLayout({label:"Ray Trace Box Pipeline Layout",bindGroupLayouts:[this._bindGroupLayout],});}
 async createComputePipeline(){this._computePipeline=this._device.createComputePipeline({label:"Ray Trace Box Orthogonal Pipeline "+this.getName(),layout:this._pipelineLayout,compute:{module:this._shaderModule,entryPoint:"computeOrthogonalMain",}});this._computeProjectivePipeline=this._device.createComputePipeline({label:"Ray Trace Box Projective Pipeline "+this.getName(),layout:this._pipelineLayout,compute:{module:this._shaderModule,entryPoint:"computeProjectiveMain",}});}
 createBindGroup(outTexture){this._bindGroup=this._device.createBindGroup({label:"Ray Trace Box Bind Group",layout:this._computePipeline.getBindGroupLayout(0),entries:[{binding:0,resource:{buffer:this._cameraBuffer}},{binding:1,resource:{buffer:this._boxBuffer}},{binding:2,resource:outTexture.createView()}],});this._wgWidth=Math.ceil(outTexture.width);this._wgHeight=Math.ceil(outTexture.height);}
 compute(pass){if(this._camera?._isProjective){pass.setPipeline(this._computeProjectivePipeline);}
