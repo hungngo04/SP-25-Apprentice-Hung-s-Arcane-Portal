@@ -51,7 +51,7 @@ var<private> value_1 = vec4f();
 
 var<private> tint_symbol_25_1 : vec3u;
 
-@group(0) @binding(0) var<storage, read_write> tint_symbol_6 : tint_symbol_6_block;
+@group(0) @binding(0) var<storage> tint_symbol_6 : tint_symbol_6_block;
 
 @group(0) @binding(1) var<storage, read_write> tint_symbol_7 : tint_symbol_6_block;
 
