@@ -31,6 +31,20 @@ import StandardTextObject from '/lib/DSViz/StandardTextObject.js'
 import Camera from '/lib/Viz/3DCamera.js'
 import CameraTriangleMeshLinearInterpolationObject from '/lib/DSViz/CameraTriangleMeshLinearInterpolationObject.js'
 
+// Define available TOSCA objects
+const TOSCA_OBJECTS = {
+  "cat": {
+    first: '/assets/TOSCA/cat0.ply',
+    second: '/assets/TOSCA/cat10.ply',
+    hasMorph: true
+  },
+  "wolf": {
+    first: '/assets/TOSCA/wolf0.ply',
+    second: '/assets/TOSCA/wolf0.ply',
+    hasMorph: false
+  }
+};
+
 async function init() {
   // Create a canvas tag
   const canvasTag = document.createElement('canvas');
@@ -51,9 +65,49 @@ async function init() {
   camera._pose[15] = 0.20977813005447388;
   camera._focal[0] = 4;
   camera._focal[1] = 4;
-  // Create a triangle mesh object with three keyframes
-  var mesh = new CameraTriangleMeshLinearInterpolationObject(renderer._device, renderer._canvasFormat, '/assets/TOSCA/cat0.ply', '/assets/TOSCA/cat10.ply', camera);
-  await renderer.appendSceneObject(mesh);
+  
+  // Default to cat object
+  let currentObject = "cat";
+  let mesh;
+  
+  // Function to load or reload the mesh
+  async function loadMesh(objectKey) {
+    // Remove existing mesh if it exists
+    if (mesh) {
+      await renderer.removeSceneObject(mesh);
+    }
+    
+    const objectData = TOSCA_OBJECTS[objectKey];
+    // Create a triangle mesh object with keyframes
+    mesh = new CameraTriangleMeshLinearInterpolationObject(
+      renderer._device, 
+      renderer._canvasFormat, 
+      objectData.first, 
+      objectData.second, 
+      camera
+    );
+    
+    await renderer.appendSceneObject(mesh);
+    
+    const speedControl = document.getElementById("animationSpeedControl");
+    if (speedControl) {
+      if (objectData.hasMorph) {
+        speedControl.style.display = "block";
+        const speedSlider = document.getElementById("animationSpeed");
+        const speedValueElement = document.getElementById("speedValue");
+        if (speedSlider) speedSlider.value = "0.01";
+        if (speedValueElement) speedValueElement.textContent = "0.01";
+        mesh._delta = 0.01;
+      } else {
+        speedControl.style.display = "none";
+      }
+    }
+    
+    return mesh;
+  }
+  
+  // Initial mesh loading
+  mesh = await loadMesh(currentObject);
   
   // ====== UI container ======
   const controlsDiv = document.createElement("div");
@@ -66,6 +120,13 @@ async function init() {
   controlsDiv.style.fontFamily = "sans-serif";
   controlsDiv.innerHTML = `
       <h3>Camera Controls</h3>
+      <!-- Object selection dropdown -->
+      <label for="objectSelect">Select Object:</label>
+      <select id="objectSelect">
+        <option value="cat">Cat</option>
+        <option value="wolf">Wolf</option>
+      </select>
+      <hr/>
       <!-- Translation buttons -->
       <button id="btnForward">Forward (Z-)</button>
       <button id="btnBackward">Backward (Z+)</button><br/><br/>
@@ -83,13 +144,21 @@ async function init() {
       <button id="btnRotZNeg">Rotate -Z</button>
       <hr/>
       <!-- Animation speed control -->
-      <label for="animationSpeed">Animation Speed:</label>
-      <input type="range" id="animationSpeed" min="0.001" max="0.05" step="0.001" value="0.01">
-      <span id="speedValue">0.01</span>
-      <hr/>
+      <div id="animationSpeedControl">
+        <label for="animationSpeed">Animation Speed:</label>
+        <input type="range" id="animationSpeed" min="0.001" max="0.05" step="0.001" value="0.01">
+        <span id="speedValue">0.01</span>
+        <hr/>
+      </div>
       <div id="fpsDisplay">FPS: 0</div>
     `;
   document.body.appendChild(controlsDiv);
+
+  // ====== Event listener for object selection ======
+  document.getElementById("objectSelect").addEventListener("change", async (e) => {
+    currentObject = e.target.value;
+    mesh = await loadMesh(currentObject);
+  });
 
   // ====== Movement parameters ======
   const moveStep = 0.05;
@@ -150,7 +219,9 @@ async function init() {
   // ====== Event listener for animation speed control ======
   document.getElementById("animationSpeed").addEventListener("input", (e) => {
     const speed = parseFloat(e.target.value);
-    mesh._delta = speed;
+    if (mesh) {
+      mesh._delta = speed;
+    }
     document.getElementById("speedValue").textContent = speed.toFixed(3);
   });
   

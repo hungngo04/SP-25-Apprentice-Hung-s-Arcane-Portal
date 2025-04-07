@@ -29,41 +29,55 @@ async function init() {
 
   await renderer.appendSceneObject(new Standard2DFullScreenObject(renderer._device, renderer._canvasFormat, "/assets/universe.jpg"));
 
-  // Create first filled circle (the planet)
   var vertices1 = createFilledCircleVertices(0.1, 50, 0, 0, 1, 1);
   var pose1 = new Float32Array([1, 0.2, 0.2, 0, 1, 1]);
   await renderer.appendSceneObject(new Standard2DPGAPosedVertexColorObject(renderer._device, renderer._canvasFormat, vertices1, pose1));
 
-  // Create second filled circle (the sun)
+  // Create the sun (kept as before)
   var vertices2 = createFilledCircleVertices(0.3, 50, 1, 0, 0, 1);
   var pose2 = new Float32Array([1, 0, 0, 0, -0.5, -0.5]);
   await renderer.appendSceneObject(new Standard2DPGAPosedVertexColorObject(renderer._device, renderer._canvasFormat, vertices2, pose2));
 
-  // Create third filled circle (the moon) that orbits around the planet
+  // Create the moon
   var vertices3 = createFilledCircleVertices(0.05, 50, 0.8, 0.8, 0.8, 1);
-  var pose3 = new Float32Array([1, 0.3, 0.3, 0, 0.3, 0.3]);
+  var pose3 = new Float32Array([1, 0.3, 0.3, 0, pose1[4] + 0.3, pose1[5]]);
   await renderer.appendSceneObject(new Standard2DPGAPosedVertexColorObject(renderer._device, renderer._canvasFormat, vertices3, pose3));
 
+  // Define the rotation angle to be applied each frame (2D rotation).
   let angle = Math.PI / 100;
-  let center = [0.0, 0.0]; // Center of the sun
-  let center_planet = [0.2, 0.2]; // Center of the planet TODO: Fix this to be dynamic
-  let dr = PGA2D.normaliozeMotor([Math.cos(angle / 2), -Math.sin(angle / 2), -center[0] * Math.sin(angle / 2), -center[1] * Math.sin(angle / 2)]);
-  let dr_moon = PGA2D.normaliozeMotor([Math.cos(angle / 2), -Math.sin(angle / 2), -center_planet[0] * Math.sin(angle / 2), -center_planet[1] * Math.sin(angle / 2)]);
+  // Create a rotor for updating the planet and moon's motor parts.
+  let dr_planet = PGA2D.normaliozeMotor([Math.cos(angle / 2), -Math.sin(angle / 2), 0, 0]);
+
+  // Calculate the initial orbit offset for the moon relative to the planet’s center.
+  let moonOrbitOffset = [pose3[4] - pose1[4], pose3[5] - pose1[5]];
 
   setInterval(() => { 
     renderer.render();
-    let newmotor = PGA2D.normaliozeMotor(PGA2D.geometricProduct(dr, [pose1[0], pose1[1], pose1[2], pose1[3]]));
-    pose1[0] = newmotor[0];
-    pose1[1] = newmotor[1];
-    pose1[2] = newmotor[2];
-    pose1[3] = newmotor[3];
-    
-    // Update moon position
-    let newMoonMotor = PGA2D.normaliozeMotor(PGA2D.geometricProduct(dr_moon, [pose3[0], pose3[1], pose3[2], pose3[3]]));
+
+    // Update planet's rotation (motor part)
+    let newPlanetMotor = PGA2D.normaliozeMotor(PGA2D.geometricProduct(dr_planet, [pose1[0], pose1[1], pose1[2], pose1[3]]));
+    pose1[0] = newPlanetMotor[0];
+    pose1[1] = newPlanetMotor[1];
+    pose1[2] = newPlanetMotor[2];
+    pose1[3] = newPlanetMotor[3];
+
+    // Update moon's motor using the same rotation angle.
+    let newMoonMotor = PGA2D.normaliozeMotor(PGA2D.geometricProduct(dr_planet, [pose3[0], pose3[1], pose3[2], pose3[3]]));
     pose3[0] = newMoonMotor[0];
     pose3[1] = newMoonMotor[1];
     pose3[2] = newMoonMotor[2];
     pose3[3] = newMoonMotor[3];
+
+    let cosA = Math.cos(angle);
+    let sinA = Math.sin(angle);
+    let newOffsetX = moonOrbitOffset[0] * cosA - moonOrbitOffset[1] * sinA;
+    let newOffsetY = moonOrbitOffset[0] * sinA + moonOrbitOffset[1] * cosA;
+    moonOrbitOffset = [newOffsetX, newOffsetY];
+    
+    const planetCenter = [pose1[4], pose1[5]];
+    pose3[4] = planetCenter[0] + moonOrbitOffset[0];
+    pose3[5] = planetCenter[1] + moonOrbitOffset[1];
+    
   }, 100);
   return renderer;
 }
